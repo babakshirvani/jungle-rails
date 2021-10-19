@@ -3,8 +3,13 @@ Rails.application.routes.draw do
   root to: 'products#index'
 
   resources :products, only: [:index, :show]
+<<<<<<< HEAD
   resources :categories, only: [:index, :show]
   resources :about, only: [:index]
+=======
+  resources :categories, only: [:show]
+
+>>>>>>> 4c39f588ba30da975f68f1969fa0f3c9b7d898bd
   resource :cart, only: [:show] do
     post   :add_item
     post   :remove_item
