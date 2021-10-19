@@ -44,7 +44,6 @@ RSpec.describe User, type: :model do
     it "fail to save when the email address is not unique" do
       User.create(:email => 'test@test.com', :name => 'rsBabak', :password => 'rsPassTest', :password_confirmation => 'rsPassTest', :password_digest => 'passDig')
       subject.valid?
-      puts "ERRRR:::: #{subject.errors.full_messages}"
       expect(subject.errors.full_messages).not_to be_empty
     end
 
@@ -56,4 +55,19 @@ RSpec.describe User, type: :model do
     end
 
   end
+
+  describe '.authenticate_with_credentials' do
+    
+    it "return user when successfully authenticate" do
+      user = SessionsController.authenticate_with_credentials("test@test.com", "rsPassTest")
+      expect(user).eql? subject
+    end
+
+    it "return nil when unsuccessfully authenticate" do
+      user = SessionsController.authenticate_with_credentials("test@test.com", "wrongPass")
+      expect(user).eql? nil
+    end
+
+  end
+
 end
