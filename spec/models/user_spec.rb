@@ -2,10 +2,10 @@ require 'rails_helper'
 
 RSpec.describe User, type: :model do
 
+  subject {described_class.new(:email => 'test@test.com', :name => 'rsBabak', :password => 'rsPassTest', :password_confirmation => 'rsPassTest')}
+
   describe 'Validations' do
 
-    subject {described_class.new(:email => 'test@test.com', :name => 'rsBabak', :password => 'rsPassTest', :password_confirmation => 'rsPassTest', :password_digest => 'passDig')}
-   
     it "save sucessfully when all fields are set" do
       subject.valid?
       expect(subject.errors.full_messages).to be_empty
@@ -42,7 +42,14 @@ RSpec.describe User, type: :model do
     end
 
     it "fail to save when the email address is not unique" do
-      User.create(:email => 'test@test.com', :name => 'rsBabak', :password => 'rsPassTest', :password_confirmation => 'rsPassTest', :password_digest => 'passDig')
+      User.create(:email => 'test@test.com', :name => 'rsBabak', :password => 'rsPassTest', :password_confirmation => 'rsPassTest')
+      subject.valid?
+      expect(subject.errors.full_messages).not_to be_empty
+    end
+
+    it "fail to save when the password length is less than 4" do
+      subject.password = '111'
+      subject.password_confirmation = '111'
       subject.valid?
       expect(subject.errors.full_messages).not_to be_empty
     end
@@ -59,13 +66,27 @@ RSpec.describe User, type: :model do
   describe '.authenticate_with_credentials' do
     
     it "return user when successfully authenticate" do
-      user = SessionsController.authenticate_with_credentials("test@test.com", "rsPassTest")
-      expect(user).eql? subject
+      subject.save
+      user = User.authenticate_with_credentials("test@test.com", "rsPassTest")
+      expect(user).to be == subject
     end
 
     it "return nil when unsuccessfully authenticate" do
-      user = SessionsController.authenticate_with_credentials("test@test.com", "wrongPass")
-      expect(user).eql? nil
+      subject.save
+      user = User.authenticate_with_credentials("test@test.com", "wrongPass")
+      expect(user).to be == nil
+    end
+
+    it "successfully authenticate when user enter white space before and/or after their email address" do
+      subject.save
+      user = User.authenticate_with_credentials("  test@test.com  ", "rsPassTest")
+      expect(user).to be == subject
+    end
+
+    it "successfully authenticate when user  types in the wrong case for their email (e.g: TEST@TEST.COM" do
+      subject.save
+      user = User.authenticate_with_credentials("TEST@TEST.COM", "rsPassTest")
+      expect(user).to be == subject
     end
 
   end
